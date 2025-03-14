@@ -5,14 +5,29 @@ import * as React from 'react'
 import { useEffect, useState } from 'react'
 
 function Greeting({initialName = ''}) {
-  const useLocalStorageState = (key, initialName = '') => {
+  const useLocalStorageState = (
+    key, 
+    intitialValue = null, 
+    {serialize = JSON.stringify, deserialize = JSON.parse} = {},
+  ) => {
     const [state, setState] = useState(
-      () => window.localStorage.getItem(key) ?? initialName
+      () => {
+        const valueInLocalStorage = window.localStorage.getItem(key);
+        return valueInLocalStorage ? deserialize(valueInLocalStorage) : 
+        typeof intitialValue === 'function' ? intitialValue() : intitialValue;
+      }
     )
 
+    const prevKeyRef = React.useRef(key);
+
     useEffect(() => {
-      window.localStorage.setItem(key, state);
-    }, [key, state]);
+      const prevKey = prevKeyRef.current
+      if (prevKey !== key) {
+        window.localStorage.removeItem(prevKey)
+      }
+      prevKeyRef.current = key
+      window.localStorage.setItem(key, serialize(state))
+    }, [key, state, serialize]);
 
     return [state, setState];
   }
