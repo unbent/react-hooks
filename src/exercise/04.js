@@ -2,14 +2,24 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import * as React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function Board() {
-  const [squares, setSquares] = useState(() => Array(9).fill(null))
+  const [squares, setSquares] = useState(() => {
+    return JSON.parse(window.localStorage.getItem('squares')) || Array(9).fill(null);
+  });
 
+  useEffect(() => {
+    window.localStorage.setItem('squares', JSON.stringify(squares));
+  }, [squares])
+
+  console.log('squares', squares);
   const winner = calculateWinner(squares);
+  console.log('winner', winner);
   const nextValue = calculateNextValue(squares);
+  console.log('nextValue', nextValue);
   const status = calculateStatus(winner, squares, nextValue);
+  console.log('status', status);
 
   function selectSquare(square) {
     const squaresCopy = [...squares];
