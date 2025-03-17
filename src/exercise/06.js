@@ -2,10 +2,11 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
-import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView} from '../pokemon'
+import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView, PokemonErrorBoundary} from '../pokemon'
 
 function PokemonInfo({pokemonName}) {
   const [pokemon, setPokemon] = React.useState(null)
+  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
     if (!pokemonName) return;
@@ -15,17 +16,20 @@ function PokemonInfo({pokemonName}) {
       pokemonData => {
         setPokemon(pokemonData);
       }
-    )
+    ).catch(error => setError(error));
     
   }, [pokemonName])
 
-  if (pokemonName && !pokemon) {
-    return <PokemonInfoFallback name={pokemonName}/>
-  }
+  if (error) return (
+    <div role="alert">
+      There was an error:{' '}
+      <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+    </div>
+  )
 
-  if (pokemon) {
-    return <PokemonDataView pokemon={pokemon}/>
-  }
+  if (pokemonName && !pokemon) return <PokemonInfoFallback name={pokemonName}/>
+
+  if (pokemon) return <PokemonDataView pokemon={pokemon}/>
 
   return 'Submit a pokemon'
 }
