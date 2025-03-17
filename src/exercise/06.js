@@ -11,27 +11,29 @@ const statusType = {
   rejected: 'rejected',
 }
 
+const defaultState = {
+  pokemon: null,
+  error: null,
+  status: statusType.idle,
+}
+
 function PokemonInfo({pokemonName}) {
-  const [pokemon, setPokemon] = React.useState(null)
-  const [error, setError] = React.useState(null);
-  const [status, setStatus] = React.useState(statusType.idle);
+  const [state, setState] = React.useState(defaultState);
+  const {status, pokemon, error} = state
 
   React.useEffect(() => {
     if (!pokemonName) {
-      setStatus(statusType.idle);
       return;
     }
 
-    setStatus(statusType.pending);
-    setPokemon(null);
+    setState({status: statusType.pending});
+
     fetchPokemon(pokemonName).then(
-      pokemonData => {
-        setPokemon(pokemonData);
-        setStatus(statusType.resolved);
+      pokemon => {
+        setState({pokemon, status: statusType.resolved});
       }
     ).catch(error => {
-      setError(error);
-      setStatus(statusType.rejected);
+      setState({error, status: statusType.rejected});
     });
     
   }, [pokemonName])
