@@ -2,7 +2,8 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
-import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView, PokemonErrorBoundary} from '../pokemon'
+import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView} from '../pokemon'
+import { ErrorBoundary } from 'react-error-boundary';
 
 const statusType = {
   idle: 'idle',
@@ -40,12 +41,7 @@ function PokemonInfo({pokemonName}) {
 
   switch (status) {
     case statusType.rejected:
-        return (
-        <div role="alert">
-          There was an error:{' '}
-          <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
-        </div>
-      )
+        throw error;
     case statusType.pending:
       return <PokemonInfoFallback name={pokemonName}/>;
     case statusType.resolved:
@@ -56,6 +52,13 @@ function PokemonInfo({pokemonName}) {
       throw new Error(`Error: Status "${status}" not recognized`);
   }
 }
+
+const ErrorFallbackComponent = ({error}) => (
+  <div role="alert">
+    There was an error:{' '}
+    <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+  </div>
+)
 
 function App() {
   const [pokemonName, setPokemonName] = React.useState('')
@@ -69,7 +72,9 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
+        <ErrorBoundary FallbackComponent={ErrorFallbackComponent}>
+          <PokemonInfo pokemonName={pokemonName} />
+        </ErrorBoundary>
       </div>
     </div>
   )
